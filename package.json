@@ -12,7 +12,8 @@
     "start": "node dist/server.js",
     "dev": "nodemon --exec node --loader ts-node/esm src/server.ts",
     "seed": "npm run build && node dist/prisma/seed.js",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watchAll --verbose"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watchAll --verbose",
+    "testlocker": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/test/locker.test.ts --watchAll --verbose"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +21,7 @@
   "dependencies": {
     "@prisma/client": "^6.3.1",
     "express": "^4.18.2",
+    "jest-mock-extended": "^4.0.0-beta1",
     "mongodb": "^6.13.0",
     "zod": "^3.24.2"
   },

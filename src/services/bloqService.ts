@@ -1,14 +1,19 @@
-import { Prisma } from "@prisma/client";
-import { prisma } from "../utils/prisma/prisma.js";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { generateId } from "../utils/utils.js";
+import { prisma as defaultPrisma } from "../utils/prisma/prisma.js";
 
 /**
  * Creates a new bloq with the specified title and address
  * @param title - The title of the bloq
  * @param address - The address associated with the bloq
+ * @param prisma - The Prisma client to use for database operations
  * @returns The created bloq object or an error object if validation fails
  */
-export const createBloqService = async (title: string, address: string) => {
+export const createBloqService = async (
+  title: string,
+  address: string,
+  prisma: PrismaClient = defaultPrisma
+) => {
   try {
     const bloq = await prisma.bloq.create({
       data: {
@@ -41,9 +46,13 @@ export const createBloqService = async (title: string, address: string) => {
 /**
  * Retrieves a bloq by its ID
  * @param id - The unique identifier of the bloq
+ * @param prisma - The Prisma client to use for database operations
  * @returns The bloq object if found, null otherwise
  */
-export const getBloqsByID = async (id: string) => {
+export const getBloqsByID = async (
+  id: string,
+  prisma: PrismaClient = defaultPrisma
+) => {
   const bloq = await prisma.bloq.findUnique({
     where: {
       id,
@@ -57,6 +66,7 @@ export const getBloqsByID = async (id: string) => {
  * @param id - The unique identifier of the bloq to update
  * @param title - The new title for the bloq
  * @param address - The new address for the bloq
+ * @param prisma - The Prisma client to use for database operations
  * @returns The updated bloq object
  *
  * @throws Will throw an error if bloq with given ID doesn't exist
@@ -64,7 +74,8 @@ export const getBloqsByID = async (id: string) => {
 export const updateBloqService = async (
   id: string,
   title: string,
-  address: string
+  address: string,
+  prisma: PrismaClient = defaultPrisma
 ) => {
   const bloq = await prisma.bloq.update({
     where: {
@@ -81,11 +92,15 @@ export const updateBloqService = async (
 /**
  * Deletes a bloq from the database
  * @param id - The unique identifier of the bloq to delete
+ * @param prisma - The Prisma client to use for database operations
  * @returns The deleted bloq object
  *
  * @throws Will throw an error if bloq with given ID doesn't exist
  */
-export const deleteBloqService = async (id: string) => {
+export const deleteBloqService = async (
+  id: string,
+  prisma: PrismaClient = defaultPrisma
+) => {
   const bloq = await prisma.bloq.delete({
     where: {
       id,

@@ -25,8 +25,8 @@ model Bloq {
 model Locker {
   id         String   @id @map("_id") @db.String
   bloq       Bloq     @relation(fields: [bloqId], references: [id])
-  bloqId     String
-  status     LockerStatus   @default(OPEN)
+  bloqId     String   @db.String
+  status     LockerStatus   @default(CLOSED)
   isOccupied Boolean  @default(false)
   rents      Rent[]
 
@@ -37,7 +37,7 @@ model Locker {
 model Rent {
   id         String     @id @map("_id") @db.String
   locker     Locker     @relation(fields: [lockerId], references: [id])
-  lockerId   String
+  lockerId   String     @db.String
   weight     Float
   size       RentSize
   status     RentStatus @default(CREATED)
