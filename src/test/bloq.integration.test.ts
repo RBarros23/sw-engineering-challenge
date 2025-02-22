@@ -111,6 +111,76 @@ describe("Bloq Integration Tests", () => {
       expect(response.status).toBe(200);
       expect(response.body.title).toBe("Updated Title");
     });
+
+    it("should get all bloqs through API", async () => {
+      // Create test bloqs
+      await testPrisma.bloq.createMany({
+        data: [
+          {
+            id: "123e4567-e89b-12d3-a456-426614174001",
+            title: "Bloq 1",
+            address: "Address 1",
+          },
+          {
+            id: "123e4567-e89b-12d3-a456-426614174002",
+            title: "Bloq 2",
+            address: "Address 2",
+          },
+        ],
+      });
+
+      const response = await request(app).get("/api/bloqs");
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveLength(2);
+      expect(response.body[0].title).toBe("Bloq 1");
+      expect(response.body[1].title).toBe("Bloq 2");
+    });
+
+    it("should get bloq by ID through API", async () => {
+      const bloq = await testPrisma.bloq.create({
+        data: {
+          id: "123e4567-e89b-12d3-a456-426614174003",
+          title: "Test Bloq",
+          address: "Test Address",
+        },
+      });
+
+      const response = await request(app).get(`/api/bloqs/${bloq.id}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.id).toBe(bloq.id);
+      expect(response.body.title).toBe(bloq.title);
+    });
+
+    it("should return 404 for non-existent bloq", async () => {
+      const response = await request(app).get(
+        `/api/bloqs/123e4567-e89b-12d3-a456-426614174999`
+      );
+
+      expect(response.status).toBe(404);
+      expect(response.body.error).toBe("Bloq not found");
+    });
+
+    it("should delete bloq through API", async () => {
+      const bloq = await testPrisma.bloq.create({
+        data: {
+          id: "123e4567-e89b-12d3-a456-426614174004",
+          title: "To Delete",
+          address: "Delete Address",
+        },
+      });
+
+      const response = await request(app).delete(`/api/bloqs/${bloq.id}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.message).toBe("Bloq deleted successfully");
+
+      const deletedBloq = await testPrisma.bloq.findUnique({
+        where: { id: bloq.id },
+      });
+      expect(deletedBloq).toBeNull();
+    });
   });
 });
 
