@@ -13,8 +13,7 @@
     "dev": "nodemon --exec node --loader ts-node/esm src/server.ts",
     "seed": "npm run build && node dist/prisma/seed.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watchAll --verbose",
-    "testlocker": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/test/locker.test.ts --watchAll --verbose",
-    "testbloq": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/test/bloq.integration.test.ts --watchAll --verbose"
+    "testLocker": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/test/locker/locker.unit.test.ts --watchAll --verbose"
   },
   "keywords": [],
   "author": "",

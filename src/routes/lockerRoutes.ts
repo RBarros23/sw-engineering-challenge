@@ -111,5 +111,10 @@ export const createLockerRouter = (lockerController: LockerController) => {
     lockerController.getRentsByLockerId.bind(lockerController)
   );
 
+  router.delete(
+    "/:id",
+    validateRequest(getLockerByIdSchema),
+    lockerController.deleteLocker.bind(lockerController)
+  );
   return router;
 };

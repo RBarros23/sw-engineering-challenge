@@ -193,4 +193,10 @@ export class LockerService {
       throw error;
     }
   }
+
+  async deleteLockerService(id: string): Promise<void> {
+    await this.prisma.locker.delete({
+      where: { id },
+    });
+  }
 }

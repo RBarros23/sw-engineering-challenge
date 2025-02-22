@@ -161,4 +161,15 @@ export class LockerController {
         .json({ error: "Failed to get rents by locker id" });
     }
   }
+
+  async deleteLocker(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      await this.lockerService.deleteLockerService(id);
+      return res.status(200).json({ message: "Locker deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting locker:", error);
+      return res.status(500).json({ error: "Failed to delete locker" });
+    }
+  }
 }
