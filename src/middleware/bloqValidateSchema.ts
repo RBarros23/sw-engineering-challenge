@@ -22,3 +22,14 @@ export const getBloqSchema = z.object({
     id: z.string().uuid("Invalid bloq ID"),
   }),
 });
+
+export const addLockerToBloqSchema = z.object({
+  params: z.object({
+    id: z.string().uuid("Invalid bloq ID"),
+  }),
+  body: z
+    .object({
+      lockerId: z.string().uuid("Invalid locker ID"),
+    })
+    .strict(),
+});

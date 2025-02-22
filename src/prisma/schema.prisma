@@ -28,7 +28,7 @@ model Locker {
   bloqId     String   @db.String
   status     LockerStatus   @default(CLOSED)
   isOccupied Boolean  @default(false)
-  rents      Rent[]
+  rents      Rent?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -37,7 +37,7 @@ model Locker {
 model Rent {
   id         String     @id @map("_id") @db.String
   locker     Locker     @relation(fields: [lockerId], references: [id])
-  lockerId   String     @db.String
+  lockerId   String     @db.String @unique
   weight     Float
   size       RentSize
   status     RentStatus @default(CREATED)

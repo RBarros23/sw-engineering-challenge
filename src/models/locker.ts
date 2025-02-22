@@ -7,20 +7,20 @@ class LockerClass {
   public bloqId: String;
   public status: LockerStatus;
   public isOccupied: boolean;
-  public rents?: RentClass[];
+  public rent?: RentClass;
 
   constructor(
     id: String,
     bloqId: String,
     status: LockerStatus,
     isOccupied: boolean,
-    rents: RentClass[] = []
+    rent?: RentClass
   ) {
     this.id = id;
     this.bloqId = bloqId;
     this.status = status;
     this.isOccupied = isOccupied;
-    this.rents = rents;
+    this.rent = rent;
   }
 
   public open(): void {
@@ -40,13 +40,12 @@ class LockerClass {
   }
 
   public addRent(rent: RentClass): void {
-    if (!this.rents) {
-      this.rents = [];
+    if (!this.rent) {
+      this.rent = rent;
     }
-    this.rents.push(rent);
   }
 
-  public removeRent(rent: RentClass): void {
-    this.rents = this.rents?.filter((r) => r !== rent);
+  public removeRent(): void {
+    this.rent = undefined;
   }
 }

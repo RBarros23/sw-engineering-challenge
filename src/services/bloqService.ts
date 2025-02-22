@@ -1,110 +1,158 @@
 import { Prisma, PrismaClient } from "@prisma/client";
+import { BloqClass } from "../models/bloq.js";
 import { generateId } from "../utils/utils.js";
 import { prisma as defaultPrisma } from "../utils/prisma/prisma.js";
+import { LockerClass } from "../models/locker.js";
 
 /**
- * Creates a new bloq with the specified title and address
- * @param title - The title of the bloq
- * @param address - The address associated with the bloq
- * @param prisma - The Prisma client to use for database operations
- * @returns The created bloq object or an error object if validation fails
+ * Service class for managing Bloq operations in the Bloqit system.
+ * Handles CRUD operations and relationships between Bloqs and Lockers.
  */
-export const createBloqService = async (
-  title: string,
-  address: string,
-  prisma: PrismaClient = defaultPrisma
-) => {
-  try {
-    const bloq = await prisma.bloq.create({
-      data: {
-        id: generateId(),
-        title,
-        address,
-      },
-    });
-    return bloq;
-  } catch (error) {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2002"
-    ) {
-      // P2002 is the error code for unique constraint violation
-      // Only retry once with a new ID if we hit a duplicate ID
-      const bloq = await prisma.bloq.create({
+export class BloqService {
+  private prisma: PrismaClient;
+
+  /**
+   * Creates a new BloqService instance
+   * @param prisma - Optional PrismaClient instance. Uses default if not provided
+   */
+  constructor(prisma: PrismaClient = defaultPrisma) {
+    this.prisma = prisma;
+  }
+
+  /**
+   * Creates a new Bloq with the specified title and address
+   * @param title - The title of the Bloq
+   * @param address - The physical address of the Bloq
+   * @returns Promise resolving to the newly created BloqClass instance
+   * @throws Will retry with new ID if unique constraint violation occurs
+   */
+  async createBloqService(title: string, address: string): Promise<BloqClass> {
+    try {
+      const bloq = await this.prisma.bloq.create({
         data: {
           id: generateId(),
           title,
           address,
         },
       });
-      return bloq;
+      return new BloqClass(bloq.id, bloq.title, bloq.address);
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      ) {
+        const bloq = await this.prisma.bloq.create({
+          data: {
+            id: generateId(),
+            title,
+            address,
+          },
+        });
+        return new BloqClass(bloq.id, bloq.title, bloq.address);
+      }
+      throw error;
     }
-    throw error;
   }
-};
 
-/**
- * Retrieves a bloq by its ID
- * @param id - The unique identifier of the bloq
- * @param prisma - The Prisma client to use for database operations
- * @returns The bloq object if found, null otherwise
- */
-export const getBloqsByID = async (
-  id: string,
-  prisma: PrismaClient = defaultPrisma
-) => {
-  const bloq = await prisma.bloq.findUnique({
-    where: {
-      id,
-    },
-  });
-  return bloq;
-};
+  /**
+   * Retrieves a specific Bloq by ID, including its associated lockers
+   * @param id - The unique identifier of the Bloq
+   * @returns Promise resolving to BloqClass instance if found, null otherwise
+   */
+  async getBloqByIdService(id: string): Promise<BloqClass | null> {
+    const bloq = await this.prisma.bloq.findUnique({
+      where: { id },
+      include: {
+        lockers: true,
+      },
+    });
 
-/**
- * Updates an existing bloq with new title and address
- * @param id - The unique identifier of the bloq to update
- * @param title - The new title for the bloq
- * @param address - The new address for the bloq
- * @param prisma - The Prisma client to use for database operations
- * @returns The updated bloq object
- *
- * @throws Will throw an error if bloq with given ID doesn't exist
- */
-export const updateBloqService = async (
-  id: string,
-  title: string,
-  address: string,
-  prisma: PrismaClient = defaultPrisma
-) => {
-  const bloq = await prisma.bloq.update({
-    where: {
-      id,
-    },
-    data: {
-      title,
-      address,
-    },
-  });
-  return bloq;
-};
+    if (!bloq) return null;
 
-/**
- * Deletes a bloq from the database
- * @param id - The unique identifier of the bloq to delete
- * @param prisma - The Prisma client to use for database operations
- * @returns The deleted bloq object
- *
- * @throws Will throw an error if bloq with given ID doesn't exist
- */
-export const deleteBloqService = async (
-  id: string,
-  prisma: PrismaClient = defaultPrisma
-) => {
-  const bloq = await prisma.bloq.delete({
-    where: {
-      id,
-    },
-  });
-  return bloq;
-};
+    const lockers = bloq.lockers.map(
+      (locker) =>
+        new LockerClass(
+          locker.id,
+          locker.bloqId,
+          locker.status,
+          locker.isOccupied
+        )
+    );
+
+    return new BloqClass(bloq.id, bloq.title, bloq.address, lockers);
+  }
+
+  /**
+   * Retrieves all Bloqs in the system, including their associated lockers
+   * @returns Promise resolving to array of BloqClass instances
+   */
+  async getAllBloqsService(): Promise<BloqClass[]> {
+    const bloqs = await this.prisma.bloq.findMany({
+      include: {
+        lockers: true,
+      },
+    });
+
+    return bloqs.map((bloq) => {
+      const lockers = bloq.lockers.map(
+        (locker) =>
+          new LockerClass(
+            locker.id,
+            locker.bloqId,
+            locker.status,
+            locker.isOccupied
+          )
+      );
+      return new BloqClass(bloq.id, bloq.title, bloq.address, lockers);
+    });
+  }
+
+  /**
+   * Updates the title and address of a specific Bloq
+   * @param id - The unique identifier of the Bloq
+   * @param title - The new title
+   * @param address - The new address
+   * @returns Promise resolving to the updated BloqClass instance
+   */
+  async updateBloqService(
+    id: string,
+    title: string,
+    address: string
+  ): Promise<BloqClass> {
+    const bloq = await this.prisma.bloq.update({
+      where: { id },
+      data: { title, address },
+    });
+    return new BloqClass(bloq.id, bloq.title, bloq.address);
+  }
+
+  /**
+   * Deletes a specific Bloq from the system
+   * @param id - The unique identifier of the Bloq to delete
+   * @returns Promise resolving to the deleted BloqClass instance
+   */
+  async deleteBloqService(id: string): Promise<BloqClass> {
+    const bloq = await this.prisma.bloq.delete({
+      where: { id },
+    });
+    return new BloqClass(bloq.id, bloq.title, bloq.address);
+  }
+
+  /**
+   * Associates an existing locker with a specific Bloq
+   * @param id - The unique identifier of the Bloq
+   * @param lockerId - The unique identifier of the Locker to associate
+   * @returns Promise resolving to the updated BloqClass instance
+   */
+  async addLockerToBloqService(
+    id: string,
+    lockerId: string
+  ): Promise<BloqClass> {
+    const bloq = await this.prisma.bloq.update({
+      where: { id },
+      data: { lockers: { connect: { id: lockerId } } },
+    });
+
+    return new BloqClass(bloq.id, bloq.title, bloq.address);
+  }
+}

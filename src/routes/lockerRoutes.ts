@@ -104,4 +104,11 @@ router.put(
   lockerController.occupyLocker.bind(lockerController)
 );
 
+//Get rent in the locker
+router.get(
+  "/:id/rents",
+  validateRequest(getLockerByIdSchema),
+  lockerController.getRentsByLockerId.bind(lockerController)
+);
+
 export default router;

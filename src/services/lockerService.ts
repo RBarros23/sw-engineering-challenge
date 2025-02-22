@@ -161,4 +161,24 @@ export class LockerService {
       locker.isOccupied
     );
   }
+
+  async getRentsByLockerIdService(id: string): Promise<RentClass[]> {
+    try {
+      const rents = await this.prisma.rent.findMany({
+        where: { lockerId: id },
+      });
+      return rents.map(
+        (rent) =>
+          new RentClass(
+            rent.id,
+            rent.lockerId,
+            rent.weight,
+            rent.size,
+            rent.status
+          )
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
 }

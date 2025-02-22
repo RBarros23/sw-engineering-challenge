@@ -149,17 +149,16 @@ export class LockerController {
    * @param res - Express response object
    * @todo Implement rent assignment functionality
    */
-  async assignRent(req: Request, res: Response) {
-    // Handle assigning a rent to a locker
-  }
-
-  /**
-   * Removes a rent from a specific locker
-   * @param req - Express request object
-   * @param res - Express response object
-   * @todo Implement rent removal functionality
-   */
-  async removeRent(req: Request, res: Response) {
-    // Handle removing a rent from a locker
+  async getRentsByLockerId(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const rents = await this.lockerService.getRentsByLockerIdService(id);
+      return res.status(200).json(rents);
+    } catch (error) {
+      console.error("Error getting rents by locker id:", error);
+      return res
+        .status(500)
+        .json({ error: "Failed to get rents by locker id" });
+    }
   }
 }
