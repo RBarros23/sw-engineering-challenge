@@ -37,6 +37,10 @@ export class LockerService {
           isOccupied: false,
         },
       });
+      await this.prisma.bloq.update({
+        where: { id: bloqId },
+        data: { lockers: { connect: { id: locker.id } } },
+      });
       return new LockerClass(
         locker.id,
         locker.bloqId,
@@ -55,6 +59,10 @@ export class LockerService {
             status: LockerStatus.CLOSED,
             isOccupied: false,
           },
+        });
+        await this.prisma.bloq.update({
+          where: { id: bloqId },
+          data: { lockers: { connect: { id: locker.id } } },
         });
         return new LockerClass(
           locker.id,
@@ -75,6 +83,9 @@ export class LockerService {
   async getLockerByIdService(id: string): Promise<LockerClass | null> {
     const locker = await this.prisma.locker.findUnique({
       where: { id },
+      include: {
+        bloq: true,
+      },
     });
     if (!locker) return null;
     return new LockerClass(

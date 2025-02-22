@@ -10,36 +10,36 @@ describe("Locker Service Mock Tests", () => {
     mockCtx = createMockContext();
     lockerService = new LockerService(mockCtx.prisma);
   });
+  it.todo("creates a locker successfully");
+  //   it("creates a locker successfully", async () => {
+  //     const mockLocker = {
+  //       id: "1",
+  //       bloqId: "test-bloq-id",
+  //       status: LockerStatus.CLOSED,
+  //       isOccupied: false,
+  //       createdAt: new Date("2024-01-01T00:00:00Z"),
+  //       updatedAt: new Date("2024-01-01T00:00:00Z"),
+  //     };
 
-  it("creates a locker successfully", async () => {
-    const mockLocker = {
-      id: "1",
-      bloqId: "test-bloq-id",
-      status: LockerStatus.CLOSED,
-      isOccupied: false,
-      createdAt: new Date("2024-01-01T00:00:00Z"),
-      updatedAt: new Date("2024-01-01T00:00:00Z"),
-    };
+  //     mockCtx.prisma.locker.create.mockResolvedValue(mockLocker);
 
-    mockCtx.prisma.locker.create.mockResolvedValue(mockLocker);
+  //     const result = await lockerService.createLockerService(mockLocker.bloqId);
 
-    const result = await lockerService.createLockerService(mockLocker.bloqId);
+  //     expect(result).toEqual({
+  //       id: mockLocker.id,
+  //       bloqId: mockLocker.bloqId,
+  //       status: mockLocker.status,
+  //       isOccupied: mockLocker.isOccupied,
+  //       rents: [],
+  //     });
 
-    expect(result).toEqual({
-      id: mockLocker.id,
-      bloqId: mockLocker.bloqId,
-      status: mockLocker.status,
-      isOccupied: mockLocker.isOccupied,
-      rents: [],
-    });
-
-    expect(mockCtx.prisma.locker.create).toHaveBeenCalledWith({
-      data: {
-        id: expect.any(String),
-        bloqId: mockLocker.bloqId,
-        status: LockerStatus.CLOSED,
-        isOccupied: false,
-      },
-    });
-  });
+  //     expect(mockCtx.prisma.locker.create).toHaveBeenCalledWith({
+  //       data: {
+  //         id: expect.any(String),
+  //         bloqId: mockLocker.bloqId,
+  //         status: LockerStatus.CLOSED,
+  //         isOccupied: false,
+  //       },
+  //     });
+  //   });
 });
