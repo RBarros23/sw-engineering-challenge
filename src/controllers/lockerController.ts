@@ -14,7 +14,7 @@ export class LockerController {
    * Creates a new LockerController instance
    * @param lockerService - Optional LockerService instance. Creates new instance if not provided
    */
-  constructor(lockerService: LockerService = new LockerService(prisma)) {
+  constructor(lockerService: LockerService) {
     this.lockerService = lockerService;
   }
 

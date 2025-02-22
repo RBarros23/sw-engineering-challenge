@@ -17,7 +17,7 @@ export class LockerService {
    * Creates a new LockerService instance
    * @param prisma - Optional PrismaClient instance. Uses default if not provided
    */
-  constructor(prisma: PrismaClient = defaultPrisma) {
+  constructor(prisma: PrismaClient) {
     this.prisma = prisma;
   }
 

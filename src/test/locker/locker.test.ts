@@ -1,5 +1,5 @@
-import { LockerService } from "../services/lockerService.js";
-import { createMockContext, MockContext } from "./prisma-mock.js";
+import { LockerService } from "../../services/lockerService.js";
+import { createMockContext, MockContext } from "../prisma-mock.js";
 import { LockerStatus } from "@prisma/client";
 
 let mockCtx: MockContext;

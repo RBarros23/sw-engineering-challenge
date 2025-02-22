@@ -3,7 +3,7 @@ import {
   updateBloqSchema,
   getBloqSchema,
   addLockerToBloqSchema,
-} from "../middleware/bloqValidateSchema.js";
+} from "../../middleware/bloqValidateSchema.js";
 
 describe("Bloq Validation Schemas", () => {
   describe("createBloqSchema", () => {

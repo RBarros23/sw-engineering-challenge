@@ -1,5 +1,5 @@
-import { BloqService } from "../services/bloqService.js";
-import { createMockContext, MockContext } from "./prisma-mock.js";
+import { BloqService } from "../../services/bloqService.js";
+import { createMockContext, MockContext } from "../prisma-mock.js";
 import { LockerStatus } from "@prisma/client";
 import { Prisma } from "@prisma/client";
 

@@ -1,10 +1,10 @@
-import { BloqController } from "../controllers/bloqController.js";
-import { BloqService } from "../services/bloqService.js";
-import { testPrisma } from "./config/testConfig.js";
+import { BloqController } from "../../controllers/bloqController.js";
+import { BloqService } from "../../services/bloqService.js";
+import { testPrisma } from "../config/testConfig.js";
 import { LockerStatus } from "@prisma/client";
 import request from "supertest";
 import express from "express";
-import { createBloqRouter } from "../routes/bloqRoutes.js";
+import { createBloqRouter } from "../../routes/bloqRoutes.js";
 
 const app = express();
 app.use(express.json());

@@ -13,7 +13,7 @@ export class RentController {
    * Creates a new RentController instance
    * @param rentService - Optional RentService instance. Creates new instance if not provided
    */
-  constructor(rentService: RentService = new RentService(prisma)) {
+  constructor(rentService: RentService) {
     this.rentService = rentService;
   }
 
