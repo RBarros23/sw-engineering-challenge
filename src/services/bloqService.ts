@@ -15,7 +15,7 @@ export class BloqService {
    * Creates a new BloqService instance
    * @param prisma - Optional PrismaClient instance. Uses default if not provided
    */
-  constructor(prisma: PrismaClient = defaultPrisma) {
+  constructor(prisma: PrismaClient) {
     this.prisma = prisma;
   }
 

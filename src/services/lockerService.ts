@@ -29,17 +29,18 @@ export class LockerService {
    */
   async createLockerService(bloqId: string): Promise<LockerClass> {
     try {
+      const lockerId = generateId();
+      await this.prisma.bloq.update({
+        where: { id: bloqId },
+        data: { lockers: { connect: { id: lockerId } } },
+      });
       const locker = await this.prisma.locker.create({
         data: {
-          id: generateId(),
+          id: lockerId,
           bloqId,
           status: LockerStatus.CLOSED,
           isOccupied: false,
         },
-      });
-      await this.prisma.bloq.update({
-        where: { id: bloqId },
-        data: { lockers: { connect: { id: locker.id } } },
       });
       return new LockerClass(
         locker.id,
