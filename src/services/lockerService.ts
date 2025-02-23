@@ -80,7 +80,7 @@ export class LockerService {
   }
 
   /**
-   * Retrieves a locker by its unique identifier
+   * Retrieves a locker by its unique identifier, including associated bloq information
    * @param id - The unique identifier of the locker
    * @returns Promise resolving to LockerClass instance if found, null otherwise
    */
@@ -106,7 +106,6 @@ export class LockerService {
    * @returns Promise resolving to an array of LockerClass instances
    */
   async getLockersByBloqIdService(bloqId: string): Promise<LockerClass[]> {
-    // Get all lockers for a specific bloq
     const lockers = await this.prisma.locker.findMany({
       where: { bloqId },
     });
@@ -177,6 +176,12 @@ export class LockerService {
     );
   }
 
+  /**
+   * Retrieves all rents associated with a specific locker
+   * @param id - The unique identifier of the locker
+   * @returns Promise resolving to an array of RentClass instances
+   * @throws {Error} If locker with given ID doesn't exist
+   */
   async getRentsByLockerIdService(id: string): Promise<RentClass[]> {
     try {
       const locker = await this.prisma.locker.findUnique({

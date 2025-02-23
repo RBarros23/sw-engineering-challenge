@@ -13,7 +13,7 @@ export class BloqService {
 
   /**
    * Creates a new BloqService instance
-   * @param prisma - Optional PrismaClient instance. Uses default if not provided
+   * @param prisma - PrismaClient instance for database operations
    */
   constructor(prisma: PrismaClient) {
     this.prisma = prisma;
@@ -24,7 +24,8 @@ export class BloqService {
    * @param title - The title of the Bloq
    * @param address - The physical address of the Bloq
    * @returns Promise resolving to the newly created BloqClass instance
-   * @throws Will retry with new ID if unique constraint violation occurs
+   * @throws {Prisma.PrismaClientKnownRequestError} If unique constraint violation occurs, will retry with new ID
+   * @throws {Error} If database operation fails for other reasons
    */
   async createBloqService(title: string, address: string): Promise<BloqClass> {
     try {
@@ -113,6 +114,8 @@ export class BloqService {
    * @param title - The new title
    * @param address - The new address
    * @returns Promise resolving to the updated BloqClass instance
+   * @throws {Error} If Bloq with given ID is not found
+   * @throws {Error} If database operation fails
    */
   async updateBloqService(
     id: string,
@@ -123,6 +126,7 @@ export class BloqService {
       where: { id },
       data: { title, address },
     });
+    if (!bloq) throw new Error("Bloq not found");
     return new BloqClass(bloq.id, bloq.title, bloq.address);
   }
 
@@ -135,6 +139,7 @@ export class BloqService {
     const bloq = await this.prisma.bloq.delete({
       where: { id },
     });
+    if (!bloq) throw new Error("Bloq not found");
     return new BloqClass(bloq.id, bloq.title, bloq.address);
   }
 
@@ -143,6 +148,8 @@ export class BloqService {
    * @param id - The unique identifier of the Bloq
    * @param lockerId - The unique identifier of the Locker to associate
    * @returns Promise resolving to the updated BloqClass instance
+   * @throws {Error} If Bloq or Locker with given ID is not found
+   * @throws {Error} If database operation fails
    */
   async addLockerToBloqService(
     id: string,
@@ -152,7 +159,7 @@ export class BloqService {
       where: { id },
       data: { lockers: { connect: { id: lockerId } } },
     });
-
+    if (!bloq) throw new Error("Bloq not found");
     return new BloqClass(bloq.id, bloq.title, bloq.address);
   }
 }

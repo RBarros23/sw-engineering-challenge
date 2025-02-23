@@ -15,7 +15,11 @@ export const createRentRouter = (rentController: RentController) => {
    * Creates a new rent for a specific locker
    * @route POST /api/rents/locker/:lockerId
    * @param {string} lockerId.path.required - The ID of the locker to create the rent in
+   * @param {number} weight.body.required - The weight of the parcel in kilograms
+   * @param {string} size.body.required - The size category of the parcel (XS, S, M, L, XL)
    * @returns {Object} 201 - Created rent object
+   * @returns {Error} 404 - Locker not found
+   * @returns {Error} 400 - Invalid parameters or locker is already occupied
    * @returns {Error} 500 - Server error
    */
   router.post(
@@ -53,13 +57,13 @@ export const createRentRouter = (rentController: RentController) => {
   );
 
   /**
-   * Updates the status of a rent (CREATED/WAITING_DROPOFF/WAITING_PICKUP/DELIVERED)
+   * Updates the status of a rent
    * @route PUT /api/rents/:id/status
    * @param {string} id.path.required - The ID of the rent to update
-   * @param {string} status.body.required - The new status
+   * @param {string} status.body.required - The new status (CREATED/WAITING_DROPOFF/WAITING_PICKUP/DELIVERED)
    * @returns {Object} 200 - Updated rent object
    * @returns {Error} 404 - Rent not found
-   * @returns {Error} 400 - Invalid status or rent ID format
+   * @returns {Error} 400 - Invalid status transition or rent ID format
    * @returns {Error} 500 - Server error
    */
   router.put(
@@ -72,9 +76,9 @@ export const createRentRouter = (rentController: RentController) => {
    * Records a dropoff for a rent
    * @route PUT /api/rents/:id/dropoff
    * @param {string} id.path.required - The ID of the rent
-   * @returns {Object} 200 - Updated rent object with dropoff timestamp
+   * @returns {Object} 200 - Updated rent object with dropoff timestamp and WAITING_PICKUP status
    * @returns {Error} 404 - Rent not found
-   * @returns {Error} 400 - Invalid rent ID format or invalid state transition
+   * @returns {Error} 400 - Invalid rent ID format or rent not in WAITING_DROPOFF status
    * @returns {Error} 500 - Server error
    */
   router.put(
@@ -87,9 +91,9 @@ export const createRentRouter = (rentController: RentController) => {
    * Records a pickup for a rent
    * @route PUT /api/rents/:id/pickup
    * @param {string} id.path.required - The ID of the rent
-   * @returns {Object} 200 - Updated rent object with pickup timestamp
+   * @returns {Object} 200 - Updated rent object with pickup timestamp and DELIVERED status
    * @returns {Error} 404 - Rent not found
-   * @returns {Error} 400 - Invalid rent ID format or invalid state transition
+   * @returns {Error} 400 - Invalid rent ID format or rent not in WAITING_PICKUP status
    * @returns {Error} 500 - Server error
    */
   router.put(

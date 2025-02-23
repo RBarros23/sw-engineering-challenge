@@ -104,13 +104,30 @@ export const createLockerRouter = (lockerController: LockerController) => {
     lockerController.occupyLocker.bind(lockerController)
   );
 
-  //Get rent in the locker
+  /**
+   * Retrieves all rents associated with a specific locker
+   * @route GET /api/lockers/:id/rents
+   * @param {string} id.path.required - The ID of the locker to get rents from
+   * @returns {Array} 200 - Array of rent objects
+   * @returns {Error} 404 - Locker not found
+   * @returns {Error} 400 - Invalid locker ID format
+   * @returns {Error} 500 - Server error
+   */
   router.get(
     "/:id/rents",
     validateRequest(getLockerByIdSchema),
     lockerController.getRentsByLockerId.bind(lockerController)
   );
 
+  /**
+   * Deletes a specific locker
+   * @route DELETE /api/lockers/:id
+   * @param {string} id.path.required - The ID of the locker to delete
+   * @returns {Object} 200 - Success message
+   * @returns {Error} 404 - Locker not found
+   * @returns {Error} 400 - Invalid locker ID format
+   * @returns {Error} 500 - Server error
+   */
   router.delete(
     "/:id",
     validateRequest(getLockerByIdSchema),

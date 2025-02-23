@@ -41,7 +41,9 @@ export class LockerController {
    * Retrieves a specific locker by ID
    * @param req - Express request object containing locker ID in params
    * @param res - Express response object
-   * @returns 200 with locker data, 404 if not found, or 500 if retrieval fails
+   * @returns {Object} 200 - Locker data
+   * @returns {Error} 404 - If locker not found
+   * @returns {Error} 500 - If retrieval fails
    */
   async getLockerById(req: Request, res: Response) {
     try {
@@ -146,10 +148,12 @@ export class LockerController {
   }
 
   /**
-   * Assigns a rent to a specific locker
-   * @param req - Express request object
+   * Retrieves all rents associated with a specific locker
+   * @param req - Express request object containing locker ID in params
    * @param res - Express response object
-   * @todo Implement rent assignment functionality
+   * @returns {Array} 200 - Array of rent objects associated with the locker
+   * @returns {Error} 404 - If locker not found
+   * @returns {Error} 500 - If retrieval fails
    */
   async getRentsByLockerId(req: Request, res: Response) {
     try {
@@ -166,6 +170,14 @@ export class LockerController {
     }
   }
 
+  /**
+   * Deletes a specific locker
+   * @param req - Express request object containing locker ID in params
+   * @param res - Express response object
+   * @returns {Object} 200 - Success message if deletion successful
+   * @returns {Error} 404 - If locker not found
+   * @returns {Error} 500 - If deletion fails
+   */
   async deleteLocker(req: Request, res: Response) {
     try {
       const { id } = req.params;

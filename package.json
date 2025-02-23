@@ -15,7 +15,11 @@
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watchAll --verbose",
     "testLocker": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/test/locker/locker.unit.test.ts --watchAll --verbose",
     "testLockerIntegration": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/test/locker/locker.integration.test.ts --watchAll --verbose",
-    "testBloqIntegration": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/test/bloq/bloq.integration.test.ts --watchAll --verbose"
+    "testBloqIntegration": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/test/bloq/bloq.integration.test.ts --watchAll --verbose",
+    "testLockerValidateSchema": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/test/locker/lockerValidateSchema.test.ts --watchAll --verbose",
+    "testRent": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/test/rent/rent.unit.test.ts --watchAll --verbose",
+    "testRentIntegration": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/test/rent/rent.integration.test.ts --watchAll --verbose",
+    "testRentValidateSchema": "node --experimental-vm-modules node_modules/jest/bin/jest.js src/test/rent/rentValidateSchema.test.ts --watchAll --verbose"
   },
   "keywords": [],
   "author": "",

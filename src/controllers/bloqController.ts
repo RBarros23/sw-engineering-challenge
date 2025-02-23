@@ -11,12 +11,12 @@ export class BloqController {
 
   /**
    * Creates a new bloq with the specified title and address.
-   * @param req Express request object containing title and address as query parameters
+   * @param req Express request object containing title and address in the request body
    * @param res Express response object
    * @returns A JSON response with the created bloq data or an error message
    *
-   * @throws Returns 400 status if title or address are not strings
-   * @throws Returns 500 status if bloq creation fails
+   * @throws Returns 400 status if title or address are missing or invalid
+   * @throws Returns 500 status if database operation fails
    */
   async createBloq(req: Request, res: Response) {
     try {
@@ -33,9 +33,9 @@ export class BloqController {
    * Retrieves all bloqs from the database.
    * @param req Express request object
    * @param res Express response object
-   * @returns A JSON response with all bloqs or an error message
+   * @returns A JSON response with an array of all bloqs or an error message
    *
-   * @throws Returns 500 status if getting all bloqs fails
+   * @throws Returns 500 status if database query fails
    */
   async getAllBloqs(req: Request, res: Response) {
     try {
@@ -53,7 +53,8 @@ export class BloqController {
    * @param res Express response object
    * @returns A JSON response with the bloq data or an error message
    *
-   * @throws Returns 500 status if getting bloq by id fails
+   * @throws Returns 404 status if bloq is not found
+   * @throws Returns 500 status if database query fails
    */
   async getBloqById(req: Request, res: Response) {
     try {
@@ -75,8 +76,9 @@ export class BloqController {
    * @param res Express response object
    * @returns A JSON response with the updated bloq data or an error message
    *
-   * @throws Returns 400 status if title or address are not strings
-   * @throws Returns 500 status if bloq update fails
+   * @throws Returns 400 status if title or address are missing or invalid, or if ID is not a valid format
+   * @throws Returns 404 status if bloq is not found
+   * @throws Returns 500 status if database operation fails
    */
   async updateBloq(req: Request, res: Response) {
     try {
@@ -85,6 +87,9 @@ export class BloqController {
       const bloq = await this.bloqService.updateBloqService(id, title, address);
       res.status(200).json(bloq);
     } catch (error) {
+      if (error instanceof Error && error.message === "Bloq not found") {
+        return res.status(404).json({ error: "Bloq not found" });
+      }
       console.error("Error updating bloq:", error);
       res.status(500).json({ error: "Failed to update bloq" });
     }
@@ -96,7 +101,8 @@ export class BloqController {
    * @param res Express response object
    * @returns A JSON response with a success message or an error message
    *
-   * @throws Returns 500 status if bloq deletion fails
+   * @throws Returns 404 status if bloq is not found
+   * @throws Returns 500 status if database operation fails
    */
   async deleteBloq(req: Request, res: Response) {
     try {
@@ -104,11 +110,24 @@ export class BloqController {
       await this.bloqService.deleteBloqService(id);
       res.status(200).json({ message: "Bloq deleted successfully" });
     } catch (error) {
+      if (error instanceof Error && error.message === "Bloq not found") {
+        return res.status(404).json({ error: "Bloq not found" });
+      }
       console.error("Error deleting bloq:", error);
       res.status(500).json({ error: "Failed to delete bloq" });
     }
   }
 
+  /**
+   * Associates a locker with a bloq.
+   * @param req Express request object containing the bloq ID as a parameter and locker ID in the body
+   * @param res Express response object
+   * @returns A JSON response with the updated bloq data or an error message
+   *
+   * @throws Returns 400 status if locker ID is missing or invalid, or if bloq ID is not a valid format
+   * @throws Returns 404 status if bloq or locker is not found
+   * @throws Returns 500 status if database operation fails
+   */
   async addLockerToBloq(req: Request, res: Response) {
     try {
       const { id } = req.params;
@@ -116,6 +135,9 @@ export class BloqController {
       const bloq = await this.bloqService.addLockerToBloqService(id, lockerId);
       res.status(200).json(bloq);
     } catch (error) {
+      if (error instanceof Error && error.message === "Bloq not found") {
+        return res.status(404).json({ error: "Bloq not found" });
+      }
       console.error("Error adding locker to bloq:", error);
       res.status(500).json({ error: "Failed to add locker to bloq" });
     }

@@ -4,14 +4,15 @@ import { prisma } from "../utils/prisma/prisma.js";
 
 /**
  * Controller class handling rent-related HTTP requests.
- * Manages operations for creating, retrieving, and updating rents in the Bloqit system.
+ * Manages operations for creating, retrieving, updating rents, and handling dropoff/pickup events
+ * in the Bloqit parcel delivery system. Coordinates with RentService for business logic.
  */
 export class RentController {
   private rentService: RentService;
 
   /**
    * Creates a new RentController instance
-   * @param rentService - Optional RentService instance. Creates new instance if not provided
+   * @param rentService - RentService instance for handling rent-related business logic
    */
   constructor(rentService: RentService) {
     this.rentService = rentService;
@@ -19,8 +20,12 @@ export class RentController {
 
   /**
    * Creates a new rent for a specific locker
-   * @param req - Express request object containing lockerId in params and rent details in body
+   * @param req - Express request object containing lockerId in params and rent details (weight, size) in body
    * @param res - Express response object
+   * @returns {Promise<Response>} 201 with created rent data, or error response
+   * @throws {404} If locker is not found
+   * @throws {400} If locker is already occupied
+   * @throws {500} If server error occurs during creation
    */
   async createRent(req: Request, res: Response) {
     try {
@@ -33,6 +38,12 @@ export class RentController {
       );
       return res.status(201).json(rent);
     } catch (error) {
+      if (error == "Error: Locker not found") {
+        return res.status(404).json({ error: "Locker not found" });
+      }
+      if (error == "Error: Locker is already occupied") {
+        return res.status(400).json({ error: "Locker is already occupied" });
+      }
       console.error("Error creating rent:", error);
       return res.status(500).json({ error: "Failed to create rent" });
     }

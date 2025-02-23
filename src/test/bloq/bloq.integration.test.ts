@@ -1,6 +1,6 @@
 import { BloqController } from "../../controllers/bloqController.js";
 import { BloqService } from "../../services/bloqService.js";
-import { testPrisma } from "../config/testConfig.js";
+import { testPrismaInstance } from "../config/testConfig.js";
 import { LockerStatus } from "@prisma/client";
 import request from "supertest";
 import express from "express";
@@ -9,6 +9,9 @@ import { createBloqRouter } from "../../routes/bloqRoutes.js";
 const app = express();
 app.use(express.json());
 
+const testPrisma = testPrismaInstance(
+  process.env.DATABASE_TEST_BLOQ_URL as string
+);
 const bloqService = new BloqService(testPrisma);
 const bloqController = new BloqController(bloqService);
 app.use("/api/bloqs", createBloqRouter(bloqController));

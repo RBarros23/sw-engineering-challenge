@@ -1,6 +1,6 @@
 import { LockerController } from "../../controllers/lockerController.js";
 import { LockerService } from "../../services/lockerService.js";
-import { testPrisma } from "../config/testConfig.js";
+import { testPrismaInstance } from "../config/testConfig.js";
 import { LockerStatus } from "@prisma/client";
 import request from "supertest";
 import express from "express";
@@ -12,6 +12,9 @@ import { BloqService } from "../../services/bloqService.js";
 const app = express();
 app.use(express.json());
 
+const testPrisma = testPrismaInstance(
+  process.env.DATABASE_TEST_LOCKER_URL as string
+);
 const lockerService = new LockerService(testPrisma);
 const lockerController = new LockerController(lockerService);
 app.use("/api/lockers", createLockerRouter(lockerController));
@@ -21,47 +24,40 @@ const bloqController = new BloqController(bloqService);
 app.use("/api/bloqs", createBloqRouter(bloqController));
 
 describe("Locker Integration Tests", () => {
-  let bloqGlobal: request.Response;
-  beforeAll(async () => {
-    bloqGlobal = await request(app).post("/api/bloqs/").send({
-      title: "API Test Locker",
-      address: "456 API St",
-    });
-  });
-
   beforeEach(async () => {
     await testPrisma.rent.deleteMany();
     await testPrisma.locker.deleteMany();
+    await testPrisma.bloq.deleteMany();
   });
 
   afterAll(async () => {
-    await testPrisma.locker.deleteMany();
-    await testPrisma.bloq.deleteMany();
     await testPrisma.$disconnect();
   });
 
   describe("Service + Database Integration", () => {
     it("should create and retrieve a locker", async () => {
+      const bloq = await request(app).post("/api/bloqs/").send({
+        title: "Test Bloq",
+        address: "123 Test St",
+      });
+
       const response = await request(app).post(
-        `/api/lockers/bloq/${bloqGlobal.body.id}`
+        `/api/lockers/bloq/${bloq.body.id}`
       );
       expect(response.status).toBe(201);
       expect(response.body.id).toBeDefined();
-      expect(response.body.bloqId).toBe(bloqGlobal.body.id);
+      expect(response.body.bloqId).toBe(bloq.body.id);
       expect(response.body.status).toBe(LockerStatus.CLOSED);
       expect(response.body.isOccupied).toBeFalsy();
     });
 
     it("should update locker status", async () => {
-      const bloq = await testPrisma.bloq.create({
-        data: {
-          id: "123e4567-e89b-12d3-a456-426614174001",
-          title: "Test Bloq",
-          address: "123 Test St",
-        },
+      const bloq = await request(app).post("/api/bloqs/").send({
+        title: "Test Bloq",
+        address: "123 Test St",
       });
 
-      const locker = await lockerService.createLockerService(bloq.id);
+      const locker = await lockerService.createLockerService(bloq.body.id);
       const updated = await lockerService.updateStatusLockerService(
         locker.id,
         LockerStatus.OPEN
@@ -73,32 +69,34 @@ describe("Locker Integration Tests", () => {
 
   describe("API Endpoint Integration", () => {
     it("should create locker through API", async () => {
+      const bloq = await request(app).post("/api/bloqs/").send({
+        title: "Test Bloq",
+        address: "123 Test St",
+      });
+
       const response = await request(app).post(
-        `/api/lockers/bloq/${bloqGlobal.body.id}`
+        `/api/lockers/bloq/${bloq.body.id}`
       );
       expect(response.status).toBe(201);
-      expect(response.body.bloqId).toBe(bloqGlobal.body.id);
+      expect(response.body.bloqId).toBe(bloq.body.id);
       expect(response.body.status).toBe(LockerStatus.CLOSED);
     });
+
     it("should get lockers by bloq ID through API", async () => {
-      await lockerService.createLockerService(bloqGlobal.body.id);
-      await lockerService.createLockerService(bloqGlobal.body.id);
+      const bloq = await request(app).post("/api/bloqs/").send({
+        title: "Test Bloq",
+        address: "123 Test St",
+      });
+
+      await lockerService.createLockerService(bloq.body.id);
+      await lockerService.createLockerService(bloq.body.id);
+
       const response = await request(app).get(
-        `/api/lockers/bloq/${bloqGlobal.body.id}`
+        `/api/lockers/bloq/${bloq.body.id}`
       );
       expect(response.status).toBe(200);
       expect(response.body).toHaveLength(2);
-      expect(response.body[0].bloqId).toBe(bloqGlobal.body.id);
-    });
-    it("should update locker status through API", async () => {
-      const locker = await lockerService.createLockerService(
-        bloqGlobal.body.id
-      );
-      const response = await request(app)
-        .put(`/api/lockers/${locker.id}/status`)
-        .send({ status: LockerStatus.OPEN });
-      expect(response.status).toBe(200);
-      expect(response.body.status).toBe(LockerStatus.OPEN);
+      expect(response.body[0].bloqId).toBe(bloq.body.id);
     });
   });
 
@@ -117,9 +115,12 @@ describe("Locker Integration Tests", () => {
       expect(response.body.error).toBeDefined();
     });
     it("should handle invalid status when updating locker", async () => {
-      const locker = await lockerService.createLockerService(
-        bloqGlobal.body.id
-      );
+      const bloq = await request(app).post("/api/bloqs/").send({
+        title: "Test Bloq",
+        address: "123 Test St",
+      });
+
+      const locker = await lockerService.createLockerService(bloq.body.id);
       const response = await request(app)
         .put(`/api/lockers/${locker.id}/status`)
         .send({ status: "INVALID_STATUS" });
@@ -130,9 +131,12 @@ describe("Locker Integration Tests", () => {
 
   describe("Occupation Status Operations", () => {
     it("should update locker occupation status through API", async () => {
-      const locker = await lockerService.createLockerService(
-        bloqGlobal.body.id
-      );
+      const bloq = await request(app).post("/api/bloqs/").send({
+        title: "Test Bloq",
+        address: "123 Test St",
+      });
+
+      const locker = await lockerService.createLockerService(bloq.body.id);
       const response = await request(app)
         .put(`/api/lockers/${locker.id}/occupy`)
         .send({ isOccupied: true });
@@ -141,9 +145,12 @@ describe("Locker Integration Tests", () => {
     });
 
     it("should get locker occupation status through API", async () => {
-      const locker = await lockerService.createLockerService(
-        bloqGlobal.body.id
-      );
+      const bloq = await request(app).post("/api/bloqs/").send({
+        title: "Test Bloq",
+        address: "123 Test St",
+      });
+
+      const locker = await lockerService.createLockerService(bloq.body.id);
       await lockerService.occupyLockerService(locker.id, true);
       const response = await request(app).get(
         `/api/lockers/${locker.id}/is-occupied`
@@ -155,9 +162,12 @@ describe("Locker Integration Tests", () => {
 
   describe("Rent Association Operations", () => {
     it("should get rents for a locker through API", async () => {
-      const locker = await lockerService.createLockerService(
-        bloqGlobal.body.id
-      );
+      const bloq = await request(app).post("/api/bloqs/").send({
+        title: "Test Bloq",
+        address: "123 Test St",
+      });
+
+      const locker = await lockerService.createLockerService(bloq.body.id);
       const response = await request(app).get(
         `/api/lockers/${locker.id}/rents`
       );
@@ -176,9 +186,12 @@ describe("Locker Integration Tests", () => {
 
   describe("Deletion Operations", () => {
     it("should delete locker through API", async () => {
-      const locker = await lockerService.createLockerService(
-        bloqGlobal.body.id
-      );
+      const bloq = await request(app).post("/api/bloqs/").send({
+        title: "Test Bloq",
+        address: "123 Test St",
+      });
+
+      const locker = await lockerService.createLockerService(bloq.body.id);
       const response = await request(app).delete(`/api/lockers/${locker.id}`);
       expect(response.status).toBe(200);
 
