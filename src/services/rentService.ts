@@ -59,11 +59,6 @@ export class RentService {
         where: { id: lockerId },
         data: {
           isOccupied: true,
-          rents: {
-            connect: {
-              id: rentId,
-            },
-          },
         },
       }),
     ]);

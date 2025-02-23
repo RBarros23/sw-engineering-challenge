@@ -3,15 +3,15 @@ import { RentClass } from "./rent.js";
 import { LockerStatus } from "@prisma/client";
 
 class LockerClass {
-  public id: String;
-  public bloqId: String;
+  public id: string;
+  public bloqId: string;
   public status: LockerStatus;
   public isOccupied: boolean;
   public rent?: RentClass;
 
   constructor(
-    id: String,
-    bloqId: String,
+    id: string,
+    bloqId: string,
     status: LockerStatus,
     isOccupied: boolean,
     rent?: RentClass

@@ -23,6 +23,14 @@ describe("Locker Service", () => {
         updatedAt: new Date("2024-01-01T00:00:00Z"),
       };
 
+      mockCtx.prisma.bloq.findUnique.mockResolvedValue({
+        id: mockLocker.bloqId,
+        title: "Test Bloq",
+        address: "Test Address",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
       mockCtx.prisma.bloq.update.mockResolvedValue({} as any);
       mockCtx.prisma.locker.create.mockResolvedValue(mockLocker);
 
@@ -52,6 +60,14 @@ describe("Locker Service", () => {
         updatedAt: new Date(),
       };
 
+      mockCtx.prisma.bloq.findUnique.mockResolvedValue({
+        id: mockLocker.bloqId,
+        title: "Test Bloq",
+        address: "Test Address",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
       mockCtx.prisma.bloq.update.mockRejectedValueOnce(mockError);
       mockCtx.prisma.locker.create.mockResolvedValue(mockLocker);
       mockCtx.prisma.bloq.update.mockResolvedValueOnce({} as any);
@@ -76,7 +92,7 @@ describe("Locker Service", () => {
 
       mockCtx.prisma.locker.update.mockResolvedValue(mockLocker);
 
-      const result = await lockerService.updateStatusLockerStatus(
+      const result = await lockerService.updateStatusLockerService(
         mockLocker.id,
         LockerStatus.OPEN
       );
@@ -120,7 +136,7 @@ describe("Locker Service", () => {
       );
 
       await expect(
-        lockerService.updateStatusLockerStatus(
+        lockerService.updateStatusLockerService(
           "non-existent-id",
           LockerStatus.OPEN
         )

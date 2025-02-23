@@ -30,7 +30,9 @@ export class LockerController {
       const locker = await this.lockerService.createLockerService(bloqId);
       return res.status(201).json(locker);
     } catch (error) {
-      console.error("Error creating locker:", error);
+      if (error instanceof Error && error.message === "Bloq not found") {
+        return res.status(404).json({ error: "Bloq not found" });
+      }
       return res.status(500).json({ error: "Failed to create locker" });
     }
   }
@@ -89,7 +91,7 @@ export class LockerController {
     try {
       const { id } = req.params;
       const { status } = req.body;
-      const locker = await this.lockerService.updateStatusLockerStatus(
+      const locker = await this.lockerService.updateStatusLockerService(
         id,
         status
       );
@@ -155,7 +157,9 @@ export class LockerController {
       const rents = await this.lockerService.getRentsByLockerIdService(id);
       return res.status(200).json(rents);
     } catch (error) {
-      console.error("Error getting rents by locker id:", error);
+      if (error instanceof Error && error.message === "Locker not found") {
+        return res.status(404).json({ error: "Locker not found" });
+      }
       return res
         .status(500)
         .json({ error: "Failed to get rents by locker id" });
@@ -168,6 +172,9 @@ export class LockerController {
       await this.lockerService.deleteLockerService(id);
       return res.status(200).json({ message: "Locker deleted successfully" });
     } catch (error) {
+      if (error instanceof Error && error.message === "Locker not found") {
+        return res.status(404).json({ error: "Locker not found" });
+      }
       console.error("Error deleting locker:", error);
       return res.status(500).json({ error: "Failed to delete locker" });
     }

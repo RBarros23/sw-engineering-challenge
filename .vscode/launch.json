@@ -6,7 +6,12 @@
       "request": "launch",
       "name": "Debug Tests",
       "program": "${workspaceFolder}/node_modules/jest/bin/jest",
-      "args": ["--runInBand", "--watchAll=false", "${file}"],
+      "args": [
+        "--runTestsByPath",
+        "${relativeFile}",
+        "--config",
+        "jest.config.ts"
+      ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
     }

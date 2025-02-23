@@ -1,7 +1,6 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import { LockerClass } from "../models/locker.js";
 import { RentClass } from "../models/rent.js";
-import { prisma as defaultPrisma } from "../utils/prisma/prisma.js";
 import { generateId } from "../utils/utils.js";
 import { LockerStatus } from "@prisma/client";
 
@@ -29,11 +28,17 @@ export class LockerService {
    */
   async createLockerService(bloqId: string): Promise<LockerClass> {
     try {
-      const lockerId = generateId();
-      await this.prisma.bloq.update({
+      // First check if bloq exists
+      const bloq = await this.prisma.bloq.findUnique({
         where: { id: bloqId },
-        data: { lockers: { connect: { id: lockerId } } },
       });
+
+      if (!bloq) {
+        throw new Error("Bloq not found");
+      }
+
+      const lockerId = generateId();
+
       const locker = await this.prisma.locker.create({
         data: {
           id: lockerId,
@@ -42,6 +47,7 @@ export class LockerService {
           isOccupied: false,
         },
       });
+
       return new LockerClass(
         locker.id,
         locker.bloqId,
@@ -53,6 +59,7 @@ export class LockerService {
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === "P2002"
       ) {
+        // Handle ID collision case
         const locker = await this.prisma.locker.create({
           data: {
             id: generateId(),
@@ -60,10 +67,6 @@ export class LockerService {
             status: LockerStatus.CLOSED,
             isOccupied: false,
           },
-        });
-        await this.prisma.bloq.update({
-          where: { id: bloqId },
-          data: { lockers: { connect: { id: locker.id } } },
         });
         return new LockerClass(
           locker.id,
@@ -125,7 +128,7 @@ export class LockerService {
    * @returns Promise resolving to the updated LockerClass instance
    * @throws {Prisma.PrismaClientKnownRequestError} If locker with given ID doesn't exist
    */
-  async updateStatusLockerStatus(
+  async updateStatusLockerService(
     id: string,
     status: LockerStatus
   ): Promise<LockerClass> {
@@ -176,6 +179,12 @@ export class LockerService {
 
   async getRentsByLockerIdService(id: string): Promise<RentClass[]> {
     try {
+      const locker = await this.prisma.locker.findUnique({
+        where: { id },
+      });
+      if (!locker) {
+        throw new Error("Locker not found");
+      }
       const rents = await this.prisma.rent.findMany({
         where: { lockerId: id },
       });
@@ -195,8 +204,18 @@ export class LockerService {
   }
 
   async deleteLockerService(id: string): Promise<void> {
-    await this.prisma.locker.delete({
-      where: { id },
-    });
+    try {
+      await this.prisma.locker.delete({
+        where: { id },
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2025"
+      ) {
+        throw new Error("Locker not found");
+      }
+      throw error;
+    }
   }
 }
